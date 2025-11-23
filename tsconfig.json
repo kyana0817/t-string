@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "allowUnreachableCode": false,
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "moduleResolution": "node",
+    "declaration": true,
+    "pretty": true,
+    "sourceMap": false,
+    "esModuleInterop": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    // "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "removeComments": true,
+    "isolatedModules": true,
+    // "noEmit": true,
+    // "noEmitOnError": true,
+    "outDir": "lib",
+    "importHelpers": false,
+    "module": "commonjs",
+    "paths": {
+      "@/*": ["./src"],
+    },
+    "types": ["node"]
+  },
+  "include": [
+    "src/**/*", "tests/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "lib",
+    "esm"
+  ]
+}
