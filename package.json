@@ -18,7 +18,7 @@
     "test:w": "vitest --watch",
     "dev": "tsc --watch",
     "build:cjs": "tsc",
-    "build:esm": "tsc -m esNext --outDir esm --verbatimModuleSyntax",
+    "build:esm": "tsc -m esNext --moduleResolution bundler --outDir esm --verbatimModuleSyntax",
     "build": "pnpm build:cjs && pnpm build:esm"
   },
   "keywords": [],

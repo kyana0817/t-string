@@ -1,6 +1,6 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
-import { fixupConfigRules } from "@eslint/compat";
+import { fixupConfigRules, fixupPluginRules } from "@eslint/compat";
 import importNewlines from "eslint-plugin-import-newlines";
 import tsParser from "@typescript-eslint/parser";
 import path from "node:path";
