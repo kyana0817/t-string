@@ -39,3 +39,58 @@ describe('t-string with validation', () => {
       .toThrowError(ValidationError);
   });
 });
+
+describe('t-string with transfer', () => {
+  it('transfers number to string', () => {
+    const _t = t<{ age: number }>`Age: ${'age'}`.transfer({
+      age: (value) => `${value} years old`,
+    });
+    const result = _t.str({ age: 30 });
+    expect(result).toBe('Age: 30 years old');
+  });
+
+  it('validates and transfers', () => {
+    const _t = t<{ age: number }>`Age: ${'age'}`.validate({
+      age: (value) => typeof value === 'number' && value >= 0,
+    }).transfer({
+      age: (value) => `${value} years old`,
+    });
+    const result = _t.str({ age: 40 });
+    expect(result).toBe('Age: 40 years old');
+  });
+  it('throws error on invalid input before transfer', () => {
+    const _t = t<{ age: number }>`Age: ${'age'}`.validate({
+      age: (value) => typeof value === 'number' && value >= 0,
+    }).transfer({
+      age: (value) => `${value} years old`,
+    });
+    expect(() => _t.str({ age: -10 }))
+      .toThrowError(ValidationError);
+  });
+});
+
+describe('larger t-string example', () => {
+  it('complex example with validation and transfer', () => {
+    const _t = t<{ name: string; age: number; score: number }>`Student: ${'name'}, Age: ${'age'}, Score: ${'score'}`.validate({
+      age: (value) => typeof value === 'number' && value >= 0,
+      score: (value) => typeof value === 'number' && value >= 0 && value <= 100,
+    }).transfer({
+      name: (value) => value.toUpperCase(),
+      age: (value) => `${value} years`,
+      score: (value) => `${value}/100`,
+    });
+    const result = _t.str({
+      name: 'Bob', age: 22, score: 88 
+    });
+    expect(result).toBe('Student: BOB, Age: 22 years, Score: 88/100');
+  });
+  it('duplicated keys with validation and transfer', () => {
+    const _t = t<{ value: number }>`Value: ${'value'}, Double: ${'value'}`.validate({
+      value: (v) => typeof v === 'number' && v >= 0,
+    }).transfer({
+      value: (v) => v * 2,
+    });
+    const result = _t.str({ value: 15 });
+    expect(result).toBe('Value: 30, Double: 30');
+  });
+});

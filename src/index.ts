@@ -4,6 +4,10 @@ export type ValidatationMap<T extends Record<Key, unknown>> = {
   [K in keyof T]: (value: T[K]) => boolean;
 };
 
+export type TransferMap<T extends Record<Key, unknown>> = {
+  [K in keyof T]: (value: T[K]) => unknown;
+};
+
 type NumericKeys<T extends Record<Key, unknown>> = Extract<keyof T, number>;
 type FiniteNumericKeys<
   T extends Record<Key, unknown>
@@ -38,15 +42,23 @@ export function t<
   K extends Array<keyof T> = Array<keyof T>
 >(strings: TemplateStringsArray, ...keys: K) {
   const _validaters = {} as ValidatationMap<T>;
+  const _transfers = {} as TransferMap<T>;
   
   for (const k of keys) {
     _validaters[k as keyof T] = () => true;
+    _transfers[k as keyof T] = (value) => value;
   }
 
   return {
     validate(validaters: Partial<ValidatationMap<T>>){
       for (const [k, v] of Object.entries(validaters)) {
-        _validaters[k as keyof T] = v as (value: T[keyof T]) => boolean;
+        _validaters[k as keyof T] = v; 
+      }
+      return this;
+    },
+    transfer(transfers: Partial<TransferMap<T>>) {
+      for (const [k, v] of Object.entries(transfers)) {
+        _transfers[k as keyof T] = v;
       }
       return this;
     },
@@ -66,7 +78,9 @@ export function t<
         if (!validate(value as T[keyof T])) {
           throw new ValidationError(`Invalid value for key "${String(key)}": ${value}`);
         }
-        result.push(String(value), strings[i + 1]);
+        const transfer = _transfers[key];
+        const transferredValue = transfer(value);
+        result.push(String(transferredValue), strings[i + 1]);
       });
       return result.join('');
     }
