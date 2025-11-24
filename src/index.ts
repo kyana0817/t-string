@@ -1,14 +1,30 @@
-
 export type Key = string | number;
 
-export type ValidateFuncs<T extends Array<Key>> = {
-  [K in T[number]]: (value: string | number) => boolean;
+export type ValidatationMap<T extends Record<Key, unknown>> = {
+  [K in keyof T]: (value: T[K]) => boolean;
 };
 
-export type ValidatorMap<T extends Array<Key>> = Record<
-  T[number],
-  (value: string | number) => boolean
->;
+type NumericKeys<T extends Record<Key, unknown>> = Extract<keyof T, number>;
+type FiniteNumericKeys<
+  T extends Record<Key, unknown>
+> = number extends NumericKeys<T> ? never : NumericKeys<T>;
+type StringKeys<T extends Record<Key, unknown>> = Extract<keyof T, string>;
+
+type PositionalArgs<
+  T extends Record<Key, unknown>,
+  Acc extends unknown[] = []
+> = Acc['length'] extends FiniteNumericKeys<T>
+  ? PositionalArgs<T, [...Acc, T[Acc['length']]]>
+  : Acc;
+
+type NamedArgTuple<T extends Record<Key, unknown>> = StringKeys<T> extends never
+  ? []
+  : [Pick<T, StringKeys<T>>];
+
+export type StrArgs<T extends Record<Key, unknown>> = [
+  ...PositionalArgs<T>,
+  ...NamedArgTuple<T>
+];
 
 export class ValidationError extends Error {
   constructor(message: string) {
@@ -17,34 +33,40 @@ export class ValidationError extends Error {
   }
 }
 
-export function t<T extends Array<Key>>(
-  strings: TemplateStringsArray,
-  ...keys: T
-) {
-  const _validaters = {} as ValidatorMap<T>;
+export function t<
+  T extends Record<Key, unknown>,
+  K extends Array<keyof T> = Array<keyof T>
+>(strings: TemplateStringsArray, ...keys: K) {
+  const _validaters = {} as ValidatationMap<T>;
   
   for (const k of keys) {
-    _validaters[k as T[number]] = () => true;
+    _validaters[k as keyof T] = () => true;
   }
 
   return {
-    validate(validaters: Partial<ValidateFuncs<T>>){
+    validate(validaters: Partial<ValidatationMap<T>>){
       for (const [k, v] of Object.entries(validaters)) {
-        _validaters[k as T[number]] = v as (value: string | number) => boolean;
+        _validaters[k as keyof T] = v as (value: T[keyof T]) => boolean;
       }
       return this;
     },
-    str(...values: (number | string| Record<string, any>)[]) {
-      const dict = values[values.length - 1] || {};
+    str(...values: StrArgs<T>) {
+      const hasNamedKeys = keys.some((key) => typeof key === 'string');
+      const args = [...values];
+      const dict: Record<Key, unknown> = hasNamedKeys
+        ? (args.pop() as Record<Key, unknown>) ?? {}
+        : {};
       const result = [strings[0]];
       keys.forEach((key, i) => {
-        // @ts-expect-error: index signature
-        const value = Number.isInteger(key) ? values[key] : dict[key];
-        const validate = _validaters[key as T[number]];
-        if (!validate(value)) {
-          throw new ValidationError(`Invalid value for key "${key}": ${value}`);
+        const rawValue: unknown = Number.isInteger(key)
+          ? args[key as number]
+          : dict[key as Key];
+        const value = rawValue as T[keyof T];
+        const validate = _validaters[key];
+        if (!validate(value as T[keyof T])) {
+          throw new ValidationError(`Invalid value for key "${String(key)}": ${value}`);
         }
-        result.push(value, strings[i + 1]);
+        result.push(String(value), strings[i + 1]);
       });
       return result.join('');
     }
