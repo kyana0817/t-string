@@ -10,8 +10,9 @@
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "target": "ES2022",
-    "lib": ["ES2022"],
-    "moduleResolution": "node",
+    "lib": [
+      "ES2022"
+    ],
     "declaration": true,
     "pretty": true,
     "sourceMap": false,
@@ -28,12 +29,17 @@
     "importHelpers": false,
     "module": "commonjs",
     "paths": {
-      "@/*": ["./src"],
+      "@/*": [
+        "./src"
+      ],
     },
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
   "include": [
-    "src/**/*", "tests/**/*"
+    "src/**/*",
+    "tests/**/*"
   ],
   "exclude": [
     "node_modules",

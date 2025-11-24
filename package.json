@@ -1,6 +1,6 @@
 {
-  "name": "ts-project",
-  "version": "1.0.0",
+  "name": "t-string",
+  "version": "0.0.1",
   "description": "",
   "type": "module",
   "main": "lib/index.js",
@@ -15,6 +15,7 @@
     "lint": "eslint",
     "format": "eslint --fix",
     "test": "vitest run",
+    "test:w": "vitest --watch",
     "dev": "tsc --watch",
     "build:cjs": "tsc",
     "build:esm": "tsc -m esNext --outDir esm --verbatimModuleSyntax",
