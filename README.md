@@ -46,12 +46,20 @@ const ageLine = t`Age: ${'age'}`.validate({
 ageLine.str({ age: 25 }); // OK
 ageLine.str({ age: -5 }); // ValidationError: Invalid value for key "age": -5
 ```
+### Transforming values
+```ts
+const priceLine = t`Price: $${'price'}`.transfer({
+  price: (value) => value.toFixed(2),
+});
+priceLine.str({ price: 9.5 }); // "Price: $9.50"
+```
 
 ## API Reference
-### `t\`...\``
+### t\`...\`
 Creates a tagged-template builder that exposes `validate()` and `str()`.
 
 - `validate(partialValidators)` — supplies custom validators for any subset of keys. Unspecified keys default to a function that always returns `true`.
+- `transfer(partialTransfers)` — supplies custom transfer functions for any subset of keys. Unspecified keys default to an identity function.
 - `str(...values)` — injects values into the template. Numeric placeholders read from the positional arguments, string placeholders read from the final object argument. Throws `ValidationError` when a validator fails.
 
 ### `ValidationError`
